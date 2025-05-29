@@ -95,7 +95,10 @@ Använd .env lokalt och Streamlit Cloud “Secrets” vid deployment.
 
 ## ✨ **Kontakt & credits**
 
-Utvecklat av @Siffror Zakaria
+Utvecklat av [@siffror](https://github.com/siffror)  
+LinkedIn: [zakariyae-Mokhtari](https://www.linkedin.com/in/zakariyae-mokhtari/)  
+
+
 Som del av utbildningen DS24 Data Science
 
 Välkommen att lämna feedback eller skapa “issues” om du hittar buggar eller vill bidra!
