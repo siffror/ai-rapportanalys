@@ -1,10 +1,10 @@
-# 📊 AI-Rapportanalys
+# 📊 **AI-Rapportanalys**
 
 **AI-baserad analys av årsrapporter och företagsdokument – med GPT-4o, RAG och embeddings-cache**
 
 ---
 
-## 🚀 Funktioner
+## 🚀 **Funktioner**
 
 - 🔍 Analys av PDF, HTML, textfiler och bilder (med OCR)
 - 🧠 Frågebaserad sökning med GPT-4o och Retrieval-Augmented Generation (RAG)
@@ -16,7 +16,7 @@
 
 ---
 
-## 🖥️ Teknik & bibliotek
+## 🖥️ **Teknik & bibliotek**
 
 - **Python 3.10+**
 - [Streamlit](https://streamlit.io)  
@@ -45,7 +45,7 @@ ai-rapportanalys/
 ```
 ---
 
-## ▶️ Så kör du projektet lokalt
+## ▶️ **Så kör du projektet lokalt**
 
 1. **Klon repo:**
    ```bash
@@ -69,7 +69,7 @@ streamlit run app.py
 ```
 
 
-🧠 Hur funkar det?
+## 🧠 **Hur funkar det?**
 
 Ladda upp eller länka till rapport (PDF, HTML, TXT, bild)
 
@@ -83,17 +83,17 @@ GPT-4o besvarar frågan – endast utifrån rapportens innehåll!
 
 Exportera svaret som PDF eller txt vid behov
 
-🌐 Demo & länk
+## 🌐 **Demo & länk**
 
 [👉Testa live på Streamlit Cloud](https://ai-rapportanalys-ds24.streamlit.app/)
 
-🔐 Tips om API-nyckel
+## 🔐 **Tips om API-nyckel**
 
 Dela aldrig din API-nyckel i koden eller på GitHub!
 
 Använd .env lokalt och Streamlit Cloud “Secrets” vid deployment.
 
-✨ Kontakt & credits
+## ✨ **Kontakt & credits**
 
 Utvecklat av @Siffror Zakaria
 Som del av utbildningen DS24 Data Science
