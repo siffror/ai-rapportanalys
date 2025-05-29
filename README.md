@@ -1,8 +1,10 @@
 [![Streamlit Cloud](https://static.streamlit.io/badges/streamlit_badge_black_white.svg)](https://ai-rapport-analys-ds24.streamlit.app/)
-
-![Python](https://img.shields.io/badge/python-3.10%2B-blue)
-
 ![OpenAI](https://img.shields.io/badge/OpenAI-GPT--4o-8e44ad?logo=openai&logoColor=white)
+![Python](https://img.shields.io/badge/python-3.10%2B-blue)
+![License](https://img.shields.io/badge/License-MIT-green)
+
+
+---
 
 # 📊 **AI-Rapportanalys**
 
