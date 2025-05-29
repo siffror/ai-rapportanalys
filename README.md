@@ -40,9 +40,6 @@ ai-rapportanalys/
 ├── README.md # (Du är här!)
 └── .gitignore # Exkluderar känsliga/tempfiler från Git
 
-yaml
-Kopiera
-Redigera
 
 ---
 
@@ -52,25 +49,24 @@ Redigera
    ```bash
    git clone https://github.com/siffror/ai-rapportanalys.git
    cd ai-rapportanalys
+   
 Installera beroenden:
+   ```bash
 
-bash
-Kopiera
-Redigera
 pip install -r requirements.txt
+```
 Lägg till OpenAI API-nyckel:
 Skapa en fil .env i root-mappen:
+   ```bash
 
-ini
-Kopiera
-Redigera
 OPENAI_API_KEY=ditt-api-nyckel-här
+```
 Starta appen:
-
-bash
-Kopiera
-Redigera
+   ```bash
 streamlit run app.py
+```
+
+
 🧠 Hur funkar det?
 Ladda upp eller länka till rapport (PDF, HTML, TXT, bild)
 
@@ -85,7 +81,7 @@ GPT-4o besvarar frågan – endast utifrån rapportens innehåll!
 Exportera svaret som PDF eller txt vid behov
 
 🌐 Demo & länk
-👉 Testa live på Streamlit Cloud
+👉 Testa live på Streamlit Cloud [👉Testa live på Streamlit Cloud](https://ai-rapportanalys-ds24.streamlit.app/)
 
 🔐 Tips om API-nyckel
 Dela aldrig din API-nyckel i koden eller på GitHub!
