@@ -27,6 +27,7 @@
 
 ## 📦 Mappstruktur
 
+
 ai-rapportanalys/
 ├── app.py # Streamlit-huvudfil
 ├── core/ # GPT-logik, chunking, embeddings
