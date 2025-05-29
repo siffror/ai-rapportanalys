@@ -2,7 +2,7 @@
 easyocr==1.7.1
 torch==2.5.1
 torchvision==0.22.0
-torchaudio==2.2.2
+torchaudio==2.7.0
 opencv-python-headless==4.9.0.80
 
 # UI och gränssnitt
