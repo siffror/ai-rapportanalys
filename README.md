@@ -1,3 +1,9 @@
+[![Streamlit Cloud](https://static.streamlit.io/badges/streamlit_badge_black_white.svg)](https://ai-rapport-analys-ds24.streamlit.app/)
+
+![Python](https://img.shields.io/badge/python-3.10%2B-blue)
+
+![OpenAI](https://img.shields.io/badge/OpenAI-GPT--4o-8e44ad?logo=openai&logoColor=white)
+
 # 📊 **AI-Rapportanalys**
 
 **AI-baserad analys av årsrapporter och företagsdokument – med GPT-4o, RAG och embeddings-cache**
@@ -98,7 +104,8 @@ Använd .env lokalt och Streamlit Cloud “Secrets” vid deployment.
 Utvecklat av [@siffror](https://github.com/siffror)  
 LinkedIn: [zakariyae-Mokhtari](https://www.linkedin.com/in/zakariyae-mokhtari/)  
 
+[![siffror](https://github.com/siffror.png?size=50)](https://github.com/siffror)
+
 
 Som del av utbildningen DS24 Data Science
-
 Välkommen att lämna feedback eller skapa “issues” om du hittar buggar eller vill bidra!
