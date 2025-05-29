@@ -25,6 +25,7 @@
 
 ---
 
+```
 ## 📦 Mappstruktur
 
 
@@ -41,7 +42,7 @@ ai-rapportanalys/
 ├── README.md # (Du är här!)
 └── .gitignore # Exkluderar känsliga/tempfiler från Git
 
-
+```
 ---
 
 ## ▶️ Så kör du projektet lokalt
@@ -69,6 +70,7 @@ streamlit run app.py
 
 
 🧠 Hur funkar det?
+
 Ladda upp eller länka till rapport (PDF, HTML, TXT, bild)
 
 Texten extraheras och delas upp i “chunks”
@@ -82,14 +84,17 @@ GPT-4o besvarar frågan – endast utifrån rapportens innehåll!
 Exportera svaret som PDF eller txt vid behov
 
 🌐 Demo & länk
-👉 Testa live på Streamlit Cloud [👉Testa live på Streamlit Cloud](https://ai-rapportanalys-ds24.streamlit.app/)
+
+[👉Testa live på Streamlit Cloud](https://ai-rapportanalys-ds24.streamlit.app/)
 
 🔐 Tips om API-nyckel
+
 Dela aldrig din API-nyckel i koden eller på GitHub!
 
 Använd .env lokalt och Streamlit Cloud “Secrets” vid deployment.
 
 ✨ Kontakt & credits
+
 Utvecklat av @Siffror Zakaria
 Som del av utbildningen DS24 Data Science
 
