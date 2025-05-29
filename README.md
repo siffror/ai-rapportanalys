@@ -1,61 +1,99 @@
-# 📊 AI-Powered Financial Report Analyzer
+# 📊 AI-Rapportanalys
 
-This Streamlit application uses **GPT-4o** from OpenAI to analyze financial reports (HTML, PDF, or plain text). Just upload a report, ask a question, and get a contextual GPT answer — powered by **RAG** (Retrieval-Augmented Generation).
-
-## 🚀 Features
-
-- 🔍 Analyze annual/quarterly reports in any language
-- 🧠 GPT-4o answers based only on the report content
-- 📄 Supports HTML, PDF, and pasted text
-- 💾 Embeddings are generated once and cached
-- 📤 Export answers as `.txt` or `.pdf`
-- 🔐 Secrets are safely stored using Streamlit Cloud
-
-## 🌐 Live App
-
-👉 [Launch the app](https://ai-rapport-analys-ds24.streamlit.app/)
-
-## ⚙️ Technologies
-
-- Python 3.10+
-- [Streamlit](https://streamlit.io)
-- [OpenAI API](https://platform.openai.com/)
-- PyMuPDF, BeautifulSoup, Scikit-learn, dotenv, and more
-
-## 🧠 How It Works
-
-1. Extracts text from uploaded or linked reports
-2. Splits text into overlapping chunks
-3. Creates OpenAI Embeddings per chunk
-4. Finds top relevant chunks based on your question
-5. Feeds those chunks + your question to GPT-4o
-
-## 🔐 API Key Setup
-
-Add your key securely via Streamlit Cloud:
-
-```toml
-OPENAI_API_KEY = "..."
-```
-[More Info](https://docs.streamlit.io/streamlit-community-cloud/get-started/deploy-an-app/connect-to-data-sources/secrets-management)
-
-
-📦 ai-report-analyzer/
-├── app.py
-├── core/
-│   └── gpt_logic.py
-├── requirements.txt
-├── .streamlit/
-│   └── config.toml (optional)
-└── README.md
-
-✨ Created by
-Developed by @Siffror Zakaria
-as part of a data science/DS24 education project.
-
+**AI-baserad analys av årsrapporter och företagsdokument – med GPT-4o, RAG och embeddings-cache**
 
 ---
 
-✅ Just replace `@yourusername` and `https://your-image-url.com` with your actual GitHub username and (optional) app screenshot.
+## 🚀 Funktioner
 
-Let me know if you want help uploading the screenshot to GitHub or linking your name.
+- 🔍 Analys av PDF, HTML, textfiler och bilder (med OCR)
+- 🧠 Frågebaserad sökning med GPT-4o och Retrieval-Augmented Generation (RAG)
+- 📊 Automatisk identifiering av nyckeltal, utdelning, resultat, risker mm
+- 📤 Exportera AI-svar som PDF eller txt
+- 💾 Embeddings-cache för snabba och billiga återanalyser
+- 🗂️ Tydlig och modulär kodstruktur
+- 🌍 Stöd för svenska och engelska rapporter
+
+---
+
+## 🖥️ Teknik & bibliotek
+
+- **Python 3.10+**
+- [Streamlit](https://streamlit.io)  
+- [OpenAI API (GPT-4o)](https://platform.openai.com/)
+- PyMuPDF, BeautifulSoup, scikit-learn, dotenv, Tesseract/EasyOCR m.fl.
+
+---
+
+## 📦 Mappstruktur
+
+ai-rapportanalys/
+├── app.py # Streamlit-huvudfil
+├── core/ # GPT-logik, chunking, embeddings
+├── data/ # Cache, exporter, uppladdningar
+│ ├── embeddings/
+│ ├── outputs/
+│ └── uploads/
+├── services/ # API-klienter, HTML-nedladdning
+├── utils/ # Hjälpmoduler: OCR, PDF-export, filutils m.m.
+├── requirements.txt # Lista över alla Python-paket
+├── README.md # (Du är här!)
+└── .gitignore # Exkluderar känsliga/tempfiler från Git
+
+yaml
+Kopiera
+Redigera
+
+---
+
+## ▶️ Så kör du projektet lokalt
+
+1. **Klon repo:**
+   ```bash
+   git clone https://github.com/siffror/ai-rapportanalys.git
+   cd ai-rapportanalys
+Installera beroenden:
+
+bash
+Kopiera
+Redigera
+pip install -r requirements.txt
+Lägg till OpenAI API-nyckel:
+Skapa en fil .env i root-mappen:
+
+ini
+Kopiera
+Redigera
+OPENAI_API_KEY=ditt-api-nyckel-här
+Starta appen:
+
+bash
+Kopiera
+Redigera
+streamlit run app.py
+🧠 Hur funkar det?
+Ladda upp eller länka till rapport (PDF, HTML, TXT, bild)
+
+Texten extraheras och delas upp i “chunks”
+
+Embeddings skapas och cachas lokalt
+
+Du ställer en fråga – appen hittar de mest relevanta textbitarna
+
+GPT-4o besvarar frågan – endast utifrån rapportens innehåll!
+
+Exportera svaret som PDF eller txt vid behov
+
+🌐 Demo & länk
+👉 Testa live på Streamlit Cloud
+
+🔐 Tips om API-nyckel
+Dela aldrig din API-nyckel i koden eller på GitHub!
+
+Använd .env lokalt och Streamlit Cloud “Secrets” vid deployment.
+
+✨ Kontakt & credits
+Utvecklat av @Siffror Zakaria
+Som del av utbildningen DS24 Data Science
+
+Välkommen att lämna feedback eller skapa “issues” om du hittar buggar eller vill bidra!
