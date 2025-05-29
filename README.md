@@ -12,6 +12,12 @@
 
 ---
 
+## 🌐 **Demo & länk**
+
+[👉Testa live på Streamlit Cloud](https://ai-rapportanalys-ds24.streamlit.app/)
+
+---
+
 ## 🚀 **Funktioner**
 
 - 🔍 Analys av PDF, HTML, textfiler och bilder (med OCR)
@@ -91,9 +97,6 @@ GPT-4o besvarar frågan – endast utifrån rapportens innehåll!
 
 Exportera svaret som PDF eller txt vid behov
 
-## 🌐 **Demo & länk**
-
-[👉Testa live på Streamlit Cloud](https://ai-rapportanalys-ds24.streamlit.app/)
 
 ## 🔐 **Tips om API-nyckel**
 
