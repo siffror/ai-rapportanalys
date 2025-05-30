@@ -44,7 +44,6 @@ with col2:
         st.warning("Kunde inte ladda AI-animationen.")
 
 st.markdown("<h1 style='color:#3EA6FF;'>📊 AI-baserad Rapportanalys</h1>", unsafe_allow_html=True)
-st.image("https://www.appypie.com/dharam_design/wp-content/uploads/2025/05/headd.svg", width=120)
 
 # --- Input: HTML-länk, uppladdning, eller manuell text ---
 html_link = st.text_input("🌐 Rapport-länk (HTML)")
