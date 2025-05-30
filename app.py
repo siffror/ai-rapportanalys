@@ -200,9 +200,4 @@ with st.sidebar:
     st.write("📄 [GitHub Repo](https://github.com/siffror/ai-rapportanalys)")
     st.write("💬 [Lämna feedback](https://github.com/siffror/ai-rapportanalys/issues)")
     st.write("---")
-  
-
-with st.sidebar:
-   
-    st.write("---")
     st.markdown("**Kontakt:** [@siffror](https://github.com/siffror)")
