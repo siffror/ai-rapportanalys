@@ -195,7 +195,6 @@ import streamlit as st
 
 # --- SIDOMENY ---
 with st.sidebar:
-    st.title("⚙️ Inställningar")
     st.write("---")
     st.markdown("**Kontakt:** [@siffror](https://github.com/siffror)")
     st.write("📄 [GitHub Repo](https://github.com/siffror/ai-rapportanalys)")
