@@ -132,7 +132,6 @@ if text_to_analyze and len(text_to_analyze.strip()) > 20:
             answer = generate_gpt_answer(st.session_state.user_question, context)
             st.success("✅ Svar klart!")
             st.markdown(f"### 🤖 GPT-4o svar:\n{answer}")
-
             # --- RAGAS AI-evaluering ---
             ragas_result = ragas_evaluate(
                 st.session_state.user_question,
@@ -146,6 +145,7 @@ if text_to_analyze and len(text_to_analyze.strip()) > 20:
             else:
                 st.metric("Faithfulness", f"{ragas_result['faithfulness']:.2f}")
                 st.metric("Answer relevancy", f"{ragas_result['answer_relevancy']:.2f}")
+            
 
             # --- Download/export ---
             st.download_button(
@@ -168,3 +168,6 @@ if text_to_analyze and len(text_to_analyze.strip()) > 20:
                 st.success(f"PDF-filen har sparats till servern: {output_path}")
 else:
     st.info("📝 Ange text, länk eller ladda upp en fil eller bild för att börja.")
+
+
+
