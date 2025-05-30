@@ -150,24 +150,24 @@ else:
 
 
 
-            # --- Download/export ---
-            st.download_button(
-                "💾 Ladda ner svar (.txt)", 
-                answer, 
-                file_name="gpt_svar.txt", 
-                key="dl_gpt_txt_main"
-            )
-            st.download_button(
-                "📄 Ladda ner svar (.pdf)", 
-                answer_to_pdf(answer), 
-                file_name="gpt_svar.pdf", 
-                key="dl_gpt_pdf_main"
-            )
+    # --- Download/export ---
+    st.download_button(
+        "💾 Ladda ner svar (.txt)", 
+        answer, 
+        file_name="gpt_svar.txt",
+        key="dl_gpt_txt_main"
+    )
+    st.download_button(
+        "📄 Ladda ner svar (.pdf)", 
+        answer_to_pdf(answer), 
+        file_name="gpt_svar.pdf", 
+        key="dl_gpt_pdf_main"
+    )
 
-            # --- Spara GPT-svar som PDF på servern ---
-            if st.button("📄 Spara GPT-svar som PDF på servern"):
-                pdf_bytes = answer_to_pdf(answer)
-                output_path = save_output_file("gpt_svar.pdf", pdf_bytes)
-                st.success(f"PDF-filen har sparats till servern: {output_path}")
-else:
-    st.info("📝 Ange text, länk eller ladda upp en fil eller bild för att börja.")
+      # --- Spara GPT-svar som PDF på servern ---
+    if st.button("📄 Spara GPT-svar som PDF på servern"):
+        pdf_bytes = answer_to_pdf(answer)
+        output_path = save_output_file("gpt_svar.pdf", pdf_bytes)
+        st.success(f"PDF-filen har sparats till servern: {output_path}")
+    else:
+        st.info("📝 Ange text, länk eller ladda upp en fil eller bild för att börja.")
