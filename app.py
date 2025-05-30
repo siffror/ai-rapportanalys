@@ -3,6 +3,14 @@ from dotenv import load_dotenv
 import os
 import requests # För Lottie och yahooquery session
 
+
+# Hämta API-nycklar från secrets
+alpha_key = st.secrets["ALPHAVANTAGE_API_KEY"]
+finnhub_key = st.secrets["FINNHUB_API_KEY"]
+
+# Imports för respektive API-klient
+from alpha_vantage.timeseries import TimeSeries
+import finnhub
 # RAGAS och LLM funktioner
 from utils.evaluation_utils import ragas_evaluate
 from core.gpt_logic import (
