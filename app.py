@@ -134,6 +134,7 @@ if text_to_analyze and len(text_to_analyze.strip()) > 20:
             st.markdown(f"### 🤖 GPT-4o svar:\n{answer}")
 
 # --- RAGAS AI-evaluering ---
+answer = generate_gpt_answer(st.session_state.user_question, context)
 
 ragas_result = ragas_evaluate(
     st.session_state.user_question,
