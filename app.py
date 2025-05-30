@@ -44,7 +44,7 @@ with col2:
     else:
         st.warning("Kunde inte ladda AI-animationen.")
 
-st.markdown("<h1 style='color:#3EA6FF;'>📊 AI-baserad Rapportanalys</h1>", unsafe_allow_html=True)
+st.markdown("<h1 style='color:#3EA6FF;'>🤖 AI-baserad Rapportanalys</h1>", unsafe_allow_html=True)
 
 # --- Input: HTML-länk, uppladdning, eller manuell text ---
 html_link = st.text_input("🌐 Rapport-länk (HTML)")
@@ -101,10 +101,33 @@ st.text_input("Fråga:", key="user_question")
 if text_to_analyze and len(text_to_analyze.strip()) > 20:
     if st.button("🔍 Analysera med GPT"):
         with st.spinner("🤖 GPT analyserar..."):
-            # ... (din kod för embedding och chunks)
+            source_id = (html_link or uploaded_file.name if uploaded_file else text_to_analyze[:50]) + "-v2"
+            cache_file = get_embedding_cache_name(source_id)
+            embedded_chunks = load_embeddings_if_exists(cache_file)
 
+            # --- Skapa embedded_chunks om det saknas ---
+            if not embedded_chunks:
+                chunks = chunk_text(text_to_analyze)
+                embedded_chunks = []
+                for i, chunk in enumerate(chunks, 1):
+                    st.write(f"🔹 Chunk {i} – {len(chunk)} tecken")
+                    try:
+                        embedding = get_embedding(chunk)
+                        embedded_chunks.append({"text": chunk, "embedding": embedding})
+                    except Exception as e:
+                        st.error(f"❌ Fel vid embedding av chunk {i}: {e}")
+                        st.stop()
+                save_embeddings(cache_file, embedded_chunks)
+
+            # --- Kontrollera så embedded_chunks finns ---
+            if not embedded_chunks:
+                st.error("Inga embeddings tillgängliga för analys.")
+                st.stop()
+
+            # --- Nu är embedded_chunks OK att använda ---
             context, top_chunks = search_relevant_chunks(
-                st.session_state.user_question, embedded_chunks)
+                st.session_state.user_question, embedded_chunks
+            )
             st.code(context[:1000], language="text")
             answer = generate_gpt_answer(st.session_state.user_question, context)
             st.success("✅ Svar klart!")
@@ -124,11 +147,8 @@ if text_to_analyze and len(text_to_analyze.strip()) > 20:
             st.markdown(f"**Automatisk evaluering:** `{score}/1.0`")
             for msg in feedback:
                 st.warning(msg)
-            
-            # ... resten av din kod (download, spara PDF)
 
-
-            # --- Download/export (lägg till key på båda) ---
+            # --- Download/export ---
             st.download_button(
                 "💾 Ladda ner svar (.txt)", 
                 answer, 
