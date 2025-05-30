@@ -1,5 +1,6 @@
 import streamlit as st
 from dotenv import load_dotenv
+from utils.evaluation_utils import simple_evaluate
 
 from core.gpt_logic import (
     search_relevant_chunks, generate_gpt_answer, get_embedding,
@@ -100,22 +101,7 @@ st.text_input("Fråga:", key="user_question")
 if text_to_analyze and len(text_to_analyze.strip()) > 20:
     if st.button("🔍 Analysera med GPT"):
         with st.spinner("🤖 GPT analyserar..."):
-            source_id = (html_link or uploaded_file.name if uploaded_file else text_to_analyze[:50]) + "-v2"
-            cache_file = get_embedding_cache_name(source_id)
-            embedded_chunks = load_embeddings_if_exists(cache_file)
-
-            if not embedded_chunks:
-                chunks = chunk_text(text_to_analyze)
-                embedded_chunks = []
-                for i, chunk in enumerate(chunks, 1):
-                    st.write(f"🔹 Chunk {i} – {len(chunk)} tecken")
-                    try:
-                        embedding = get_embedding(chunk)
-                        embedded_chunks.append({"text": chunk, "embedding": embedding})
-                    except Exception as e:
-                        st.error(f"❌ Fel vid embedding av chunk {i}: {e}")
-                        st.stop()
-                save_embeddings(cache_file, embedded_chunks)
+            # ... (din kod för embedding och chunks)
 
             context, top_chunks = search_relevant_chunks(
                 st.session_state.user_question, embedded_chunks)
@@ -129,6 +115,18 @@ if text_to_analyze and len(text_to_analyze.strip()) > 20:
                 st.markdown("### 📊 Möjliga nyckeltal i svaret:")
                 for row in key_figures:
                     st.markdown(f"- {row}")
+
+            # --- AUTOMATISK EVALUERING HÄR ---
+            score, feedback = simple_evaluate(
+                answer,
+                required_keywords=["utdelning", "rapport"]
+            )
+            st.markdown(f"**Automatisk evaluering:** `{score}/1.0`")
+            for msg in feedback:
+                st.warning(msg)
+            
+            # ... resten av din kod (download, spara PDF)
+
 
             # --- Download/export (lägg till key på båda) ---
             st.download_button(
