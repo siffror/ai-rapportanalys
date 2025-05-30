@@ -133,20 +133,20 @@ if text_to_analyze and len(text_to_analyze.strip()) > 20:
             st.success("✅ Svar klart!")
             st.markdown(f"### 🤖 GPT-4o svar:\n{answer}")
 
-            key_figures = [row for row in answer.split("\n") if is_key_figure(row)]
-            if key_figures:
-                st.markdown("### 📊 Möjliga nyckeltal i svaret:")
-                for row in key_figures:
-                    st.markdown(f"- {row}")
+# --- RAGAS AI-evaluering ---
+            try:
+                from ragas import evaluate
+                ragas_result = evaluate(
+                    question=st.session_state.user_question,
+                    answer=answer,
+                    contexts=[chunk[1] for chunk in top_chunks]
+                )
+                st.markdown("### Automatisk AI-evaluering:")
+                st.metric("Faithfulness", f"{ragas_result['faithfulness']:.2f}")
+                st.metric("Answer Relevancy", f"{ragas_result['answer_relevancy']:.2f}")
+            except Exception as e:
+                st.info(f"(RAGAS) Kunde inte utvärdera svaret: {e}")
 
-            # --- AUTOMATISK EVALUERING HÄR ---
-            score, feedback = simple_evaluate(
-                answer,
-                required_keywords=["utdelning", "rapport"]
-            )
-            st.markdown(f"**Automatisk evaluering:** `{score}/1.0`")
-            for msg in feedback:
-                st.warning(msg)
 
             # --- Download/export ---
             st.download_button(
