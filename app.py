@@ -196,7 +196,6 @@ import streamlit as st
 # --- SIDOMENY ---
 with st.sidebar:
     st.title("⚙️ Inställningar")
-    color_mode = st.radio("Färgtema:", ["Dark", "Light", "System"], index=0)
     st.write("---")
     st.markdown("**Kontakt:** [@siffror](https://github.com/siffror)")
     st.write("📄 [GitHub Repo](https://github.com/siffror/ai-rapportanalys)")
