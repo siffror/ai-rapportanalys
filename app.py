@@ -133,42 +133,38 @@ if text_to_analyze and len(text_to_analyze.strip()) > 20:
             st.success("✅ Svar klart!")
             st.markdown(f"### 🤖 GPT-4o svar:\n{answer}")
 
-# --- RAGAS AI-evaluering ---
-answer = generate_gpt_answer(st.session_state.user_question, context)
+            # --- RAGAS AI-evaluering ---
+            ragas_result = ragas_evaluate(
+                st.session_state.user_question,
+                answer,
+                [chunk[1] for chunk in top_chunks]
+            )
 
-ragas_result = ragas_evaluate(
-    st.session_state.user_question,
-    answer,
-    [chunk[1] for chunk in top_chunks]
-)
+            st.markdown("### Automatisk AI-evaluering (RAGAS):")
+            if "error" in ragas_result:
+                st.info(f"(RAGAS) Kunde inte utvärdera svaret: {ragas_result['error']}")
+            else:
+                st.metric("Faithfulness", f"{ragas_result['faithfulness']:.2f}")
+                st.metric("Answer relevancy", f"{ragas_result['answer_relevancy']:.2f}")
 
-st.markdown("### Automatisk AI-evaluering (RAGAS):")
-if "error" in ragas_result:
-    st.info(f"(RAGAS) Kunde inte utvärdera svaret: {ragas_result['error']}")
+            # --- Download/export ---
+            st.download_button(
+                "💾 Ladda ner svar (.txt)", 
+                answer, 
+                file_name="gpt_svar.txt",
+                key="dl_gpt_txt_main"
+            )
+            st.download_button(
+                "📄 Ladda ner svar (.pdf)", 
+                answer_to_pdf(answer), 
+                file_name="gpt_svar.pdf", 
+                key="dl_gpt_pdf_main"
+            )
+
+            # --- Spara GPT-svar som PDF på servern ---
+            if st.button("📄 Spara GPT-svar som PDF på servern"):
+                pdf_bytes = answer_to_pdf(answer)
+                output_path = save_output_file("gpt_svar.pdf", pdf_bytes)
+                st.success(f"PDF-filen har sparats till servern: {output_path}")
 else:
-    st.metric("Faithfulness", f"{ragas_result['faithfulness']:.2f}")
-    st.metric("Answer relevancy", f"{ragas_result['answer_relevancy']:.2f}")
-
-
-
-    # --- Download/export ---
-    st.download_button(
-        "💾 Ladda ner svar (.txt)", 
-        answer, 
-        file_name="gpt_svar.txt",
-        key="dl_gpt_txt_main"
-    )
-    st.download_button(
-        "📄 Ladda ner svar (.pdf)", 
-        answer_to_pdf(answer), 
-        file_name="gpt_svar.pdf", 
-        key="dl_gpt_pdf_main"
-    )
-
-      # --- Spara GPT-svar som PDF på servern ---
-    if st.button("📄 Spara GPT-svar som PDF på servern"):
-        pdf_bytes = answer_to_pdf(answer)
-        output_path = save_output_file("gpt_svar.pdf", pdf_bytes)
-        st.success(f"PDF-filen har sparats till servern: {output_path}")
-    else:
-        st.info("📝 Ange text, länk eller ladda upp en fil eller bild för att börja.")
+    st.info("📝 Ange text, länk eller ladda upp en fil eller bild för att börja.")
