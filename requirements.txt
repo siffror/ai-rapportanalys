@@ -1,6 +1,6 @@
 # OCR och bildbehandling
 easyocr==1.7.2
-torch==2.5.1
+torch==2.7.0
 torchvision==0.22.0
 torchaudio==2.7.0
 opencv-python-headless==4.9.0.80
