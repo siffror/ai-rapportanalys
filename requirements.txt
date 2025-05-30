@@ -9,6 +9,9 @@ yahooquery
 streamlit==1.44.0
 python-dotenv==1.0.1
 streamlit-lottie==0.0.5
+alpha_vantage
+finnhub_python
+python_dotenv
 
 # Dataanalys
 pandas==2.2.3
