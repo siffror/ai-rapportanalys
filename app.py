@@ -1,6 +1,6 @@
 import streamlit as st
 from dotenv import load_dotenv
-from utils.evaluation_utils import simple_evaluate
+from utils.evaluation_utils import ragas_evaluate
 
 from core.gpt_logic import (
     search_relevant_chunks, generate_gpt_answer, get_embedding,
