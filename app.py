@@ -22,7 +22,7 @@ for d in ["data/embeddings", "data/outputs", "data/uploads"]:
     os.makedirs(d, exist_ok=True)
 
 load_dotenv()
-st.set_page_config(page_title="📊 AI Rapportanalys", layout="wide")
+st.set_page_config(page_title="🤖 AI Rapportanalys", layout="wide")
 
 # --- Lottie-animation (från din nya kod) ---
 col1, col2, col3 = st.columns([3, 4, 3])
