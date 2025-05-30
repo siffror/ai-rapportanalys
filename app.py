@@ -190,14 +190,5 @@ with tab3:
     - Snabb, modern dashboard med Streamlit
     - Utvecklad av [@siffror](https://github.com/siffror)
     """)
-import streamlit as st
-# ... dina andra imports och ev. set_page_config
 
-# --- SIDOMENY ---
-with st.sidebar:
-    st.write("---")
-    st.markdown("**Kontakt:** [@siffror](https://github.com/siffror)")
-    st.write("📄 [GitHub Repo](https://github.com/siffror/ai-rapportanalys)")
-    st.write("💬 [Lämna feedback](https://github.com/siffror/ai-rapportanalys/issues)")
-    st.write("---")
-    st.markdown("**Kontakt:** [@siffror](https://github.com/siffror)")
+
