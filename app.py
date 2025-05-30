@@ -134,18 +134,20 @@ if text_to_analyze and len(text_to_analyze.strip()) > 20:
             st.markdown(f"### 🤖 GPT-4o svar:\n{answer}")
 
 # --- RAGAS AI-evaluering ---
-            try:
-                from ragas import evaluate
-                ragas_result = evaluate(
-                    question=st.session_state.user_question,
-                    answer=answer,
-                    contexts=[chunk[1] for chunk in top_chunks]
-                )
-                st.markdown("### Automatisk AI-evaluering:")
-                st.metric("Faithfulness", f"{ragas_result['faithfulness']:.2f}")
-                st.metric("Answer Relevancy", f"{ragas_result['answer_relevancy']:.2f}")
-            except Exception as e:
-                st.info(f"(RAGAS) Kunde inte utvärdera svaret: {e}")
+
+ragas_result = ragas_evaluate(
+    st.session_state.user_question,
+    answer,
+    [chunk[1] for chunk in top_chunks]
+)
+
+st.markdown("### Automatisk AI-evaluering (RAGAS):")
+if "error" in ragas_result:
+    st.info(f"(RAGAS) Kunde inte utvärdera svaret: {ragas_result['error']}")
+else:
+    st.metric("Faithfulness", f"{ragas_result['faithfulness']:.2f}")
+    st.metric("Answer relevancy", f"{ragas_result['answer_relevancy']:.2f}")
+
 
 
             # --- Download/export ---
