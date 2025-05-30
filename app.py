@@ -11,7 +11,7 @@ from core.gpt_logic import (
     chunk_text, 
     full_rapportanalys
 )
-# Importera get_embedding från där den är definierad (t.ex. core.embedding_utils eller core.gpt_logic)
+# Importera get_embedding från där den är definierad
 from core.embedding_utils import get_embedding 
 
 # Fil- och datahantering
@@ -19,7 +19,7 @@ from core.file_processing import extract_text_from_file
 from utils.cache_utils import get_embedding_cache_name, save_embeddings, load_embeddings_if_exists
 from utils.ocr_utils import extract_text_from_image_or_pdf
 from utils.pdf_utils import answer_to_pdf
-from utils.file_utils import save_output_file, save_uploaded_file
+from utils.file_utils import save_output_file, save_uploaded_file # save_output_file används för serversparning
 from services.html_downloader import fetch_html_text
 
 # För aktiedata och tickersökning
@@ -36,14 +36,23 @@ st.set_page_config(page_title="🤖 AI Rapportanalys", layout="wide")
 # --- Funktioner för Aktiedata ---
 @st.cache_data(ttl=3600) # Cache i 1 timme
 def get_stock_metrics(ticker_symbol: str):
-    st.write(f"[Debug] Hämtar nyckeltal för: {ticker_symbol}")
+    st.write(f"[Debug get_stock_metrics] Försöker hämta för: {ticker_symbol}")
     if not ticker_symbol:
+        st.write("[Debug get_stock_metrics] Ticker saknas.")
         return {"error": "Ticker saknas."}
     try:
-        # Använd en session för yahooquery för potentiellt bättre stabilitet/prestanda
         session = requests.Session()
         t = Ticker(ticker_symbol, validate=True, progress=False, session=session)
         
+        # Kontrollera om Ticker-objektet faktiskt fick någon data alls
+        if not (hasattr(t, 'price') and t.price) and \
+           not (hasattr(t, 'summary_detail') and t.summary_detail) and \
+           not (hasattr(t, 'key_stats') and t.key_stats) and \
+           not (hasattr(t, 'summary_profile') and t.summary_profile) and \
+           not (hasattr(t, 'financial_data') and t.financial_data):
+            st.warning(f"[Debug get_stock_metrics] Ingen data alls returnerades från Ticker-objektet för {ticker_symbol}")
+            return {"error": f"Ingen data hittades för ticker {ticker_symbol}."}
+
         price_data = t.price.get(ticker_symbol, {}) if hasattr(t, 'price') and t.price else {}
         current_price = price_data.get('regularMarketPrice')
         currency = price_data.get('currency')
@@ -65,34 +74,37 @@ def get_stock_metrics(ticker_symbol: str):
         if market_cap is None:
             financial_data = t.financial_data.get(ticker_symbol, {}) if hasattr(t, 'financial_data') and t.financial_data else {}
             market_cap = financial_data.get('marketCap')
-
-        return {
+        
+        collected_metrics = {
             'Price': current_price, 'Currency': currency, 'MarketCap': market_cap,
             'PE': pe_ratio, 'Beta': beta,
             'DirectYield': dividend_yield_raw * 100 if dividend_yield_raw is not None else None,
             'Dividend': dividend_rate_annual, '52WeekHigh': fifty_two_week_high,
             '52WeekLow': fifty_two_week_low,
         }
+        st.write(f"[Debug get_stock_metrics] Insamlade nyckeltal för {ticker_symbol}: {collected_metrics}")
+        return collected_metrics
     except Exception as e:
-        st.error(f"Ett oväntat fel inträffade vid hämtning av aktiedata för {ticker_symbol}: {e}")
-        return {"error": f"Kunde inte hämta data för {ticker_symbol}."}
+        st.error(f"Ett oväntat fel i get_stock_metrics för {ticker_symbol}: {type(e).__name__} - {e}")
+        import traceback
+        st.text_area("Detaljerad traceback (get_stock_metrics):", traceback.format_exc(), height=100, key=f"traceback_get_metrics_{ticker_symbol}")
+        return {"error": f"Kunde inte hämta data för {ticker_symbol}. Fel: {type(e).__name__}"}
 
 @st.cache_data(ttl=3600)
 def search_for_tickers_by_name(company_query: str) -> list:
     if not company_query:
         return []
     try:
-        st.write(f"[Debug] Söker efter tickers för företagsnamn: {company_query}")
-        search_results = yahoo_ticker_search(company_query)
+        st.write(f"[Debug search_tickers] Söker efter: {company_query}")
+        search_results = yahoo_ticker_search(company_query) # Använder alias
         quotes_found = search_results.get('quotes', [])
         
         valid_results = []
         for quote in quotes_found:
             if isinstance(quote, dict) and 'symbol' in quote and ('shortname' in quote or 'longname' in quote):
-                # Exempel på filter: Inkludera bara aktier (EQUITY)
-                if quote.get('quoteType') == 'EQUITY':
+                if quote.get('quoteType') == 'EQUITY': # Filtrera för att bara ta aktier
                     valid_results.append(quote)
-        st.write(f"[Debug] Hittade {len(valid_results)} giltiga aktie-tickers.")
+        st.write(f"[Debug search_tickers] Hittade {len(valid_results)} giltiga aktie-tickers.")
         return valid_results
     except Exception as e:
         st.error(f"Fel vid tickersökning för '{company_query}': {e}")
@@ -111,7 +123,7 @@ with col2_lottie:
         st_lottie(lottie_json, speed=1, width=240, height=240, loop=True, quality="high", key="ai_logo")
     except requests.exceptions.RequestException as e_req:
         st.warning(f"Kunde inte ladda AI-animationen (nätverksfel): {e_req}")
-    except requests.exceptions.JSONDecodeError as e_json: # Korrigerat feltyp
+    except requests.exceptions.JSONDecodeError as e_json:
         st.warning(f"Kunde inte tolka AI-animationen (JSON-fel): {e_json}")
 
 st.markdown("<h1 style='color:#3EA6FF;'>🤖 AI-baserad Rapportanalys</h1>", unsafe_allow_html=True)
@@ -121,17 +133,17 @@ with st.sidebar:
     st.header("🔍 Sök Aktie")
     company_name_search_query = st.text_input(
         "Sök företagsnamn för att hitta ticker:", 
-        key="company_search_input_key" # Unik nyckel
+        key="company_search_input_key"
     )
 
-    # Session state för den valda/inmatade tickern
     if 'selected_ticker_for_metrics' not in st.session_state:
-        st.session_state.selected_ticker_for_metrics = "VOLV-B.ST" # Defaultvärde
+        st.session_state.selected_ticker_for_metrics = "VOLV-B.ST"
 
-    if company_name_search_query: # Om användaren har skrivit något i sökfältet
+    if company_name_search_query:
         found_tickers = search_for_tickers_by_name(company_name_search_query)
         if found_tickers:
-            ticker_options_display = {"": "Välj en aktie från sökresultat..."} # Tomt förstaval
+            # Skapa display-alternativ för selectbox, med tomt alternativ först
+            ticker_options_display = {"": "Välj en aktie från sökresultat..."}
             for item in found_tickers:
                 name = item.get('shortname', item.get('longname', 'Okänt namn'))
                 symbol = item['symbol']
@@ -139,27 +151,33 @@ with st.sidebar:
                 display_str = f"{name} ({symbol}) - {exchange_display}"
                 ticker_options_display[display_str] = symbol
             
-            selected_display_str = st.selectbox(
+            # Använd en callback för att uppdatera session state när selectbox ändras
+            def on_ticker_select():
+                selected_str = st.session_state.search_result_selectbox_key # Hämta värdet från selectboxen
+                if selected_str and ticker_options_display[selected_str] != "":
+                    st.session_state.selected_ticker_for_metrics = ticker_options_display[selected_str]
+                    # Återställ sökfältet (valfritt, men kan ge bättre UX)
+                    st.session_state.company_search_input_key = "" 
+            
+            st.selectbox(
                 "Sökresultat:",
                 options=list(ticker_options_display.keys()),
-                key="search_result_selectbox_key", # Unik nyckel
-                index=0 # Default till det tomma valet
+                key="search_result_selectbox_key",
+                index=0, # Default till det tomma valet
+                on_change=on_ticker_select # Använd callback
             )
-            if selected_display_str and ticker_options_display[selected_display_str] != "": # Om ett giltigt val gjorts
-                st.session_state.selected_ticker_for_metrics = ticker_options_display[selected_display_str]
-                # Återställ sökfältet så att selectboxen försvinner om man vill söka igen (valfritt)
-                # st.session_state.company_search_input_key = "" # Kan orsaka omedelbar omkörning
-        elif company_name_search_query:
+        elif company_name_search_query: # Sökt men inget hittades
             st.info("Inga aktier hittades för din sökning.")
 
     st.header("📈 Aktieinformation")
     # Ticker-inmatningsfältet använder och uppdaterar session state
+    # Detta fält låter användaren också manuellt skriva in en ticker
     st.text_input(
         "Aktieticker:", 
         key="selected_ticker_for_metrics" # Kopplad till session_state
     )
 
-    stock_metrics_data = None
+    stock_metrics_data = None # Definiera utanför if-satsen
     if st.session_state.selected_ticker_for_metrics:
         stock_metrics_data = get_stock_metrics(st.session_state.selected_ticker_for_metrics)
 
@@ -171,7 +189,6 @@ with st.sidebar:
             currency_val = stock_metrics_data.get('Currency', '')
             st.markdown(f"#### {ticker_display_name} ({currency_val})")
             
-            # Visa nyckeltal
             price_val = stock_metrics_data.get('Price')
             st.metric("Senaste pris", f"{price_val:.2f} {currency_val}" if price_val is not None else "–")
             market_cap_val = stock_metrics_data.get('MarketCap')
@@ -197,70 +214,73 @@ with st.sidebar:
 
 # --- Huvudinnehåll: Input för rapportanalys ---
 st.header("📄 Mata in rapporttext")
-html_link = st.text_input("🌐 Klistra in HTML-länk till rapport (valfritt):")
-uploaded_file = st.file_uploader("📎 Eller ladda upp rapportfil (PDF, TXT, HTML, DOCX etc.):", 
-    type=["html", "pdf", "txt", "docx", "md", "png", "jpg", "jpeg"]) # Utökat filtyper lite
-manual_text_input = st.text_area("✏️ Eller klistra in text manuellt här (valfritt):", "", height=200)
+# Använd kolumner för en mer kompakt inputsektion
+input_col1, input_col2 = st.columns(2)
+with input_col1:
+    html_link = st.text_input("🌐 Klistra in HTML-länk till rapport (valfritt):", key="html_link_input")
+    uploaded_file = st.file_uploader("📎 Eller ladda upp rapportfil:", 
+        type=["pdf", "txt", "html", "docx", "md", "png", "jpg", "jpeg"], key="file_uploader_input")
+with input_col2:
+    manual_text_input = st.text_area("✏️ Eller klistra in text manuellt här (valfritt):", height=205, key="manual_text_input")
 
 preview_text, ocr_extracted_text = "", ""
 
 if uploaded_file:
-    # save_path = save_uploaded_file(uploaded_file) # Spara bara om nödvändigt, eller hantera temporärt
-    # st.info(f"Uppladdad fil: {uploaded_file.name}") # Mindre info om serverväg
     if uploaded_file.name.endswith((".png", ".jpg", ".jpeg")):
         ocr_extracted_text, _ = extract_text_from_image_or_pdf(uploaded_file)
-        if ocr_extracted_text: st.text_area("🖼️ OCR-utläst text:", ocr_extracted_text[:2000], height=150)
+        if ocr_extracted_text: st.expander("🖼️ OCR-utläst text (förhandsvisning)").text(ocr_extracted_text[:2000])
         else: st.warning("Kunde inte extrahera text med OCR från bilden.")
     else:
         preview_text = extract_text_from_file(uploaded_file)
 elif html_link:
     preview_text = fetch_html_text(html_link)
 
-# Om manuell text finns och ingen fil/länk, använd den. Annars prioriteras fil/länk.
-text_to_analyze = preview_text or ocr_extracted_text or manual_text_input
+text_to_analyze = manual_text_input or preview_text or ocr_extracted_text # Prioritera manuell, sen fil, sen länk (eller omvänd ordning)
 
 if text_to_analyze:
-    st.text_area("📜 Text som kommer att analyseras (förhandsvisning):", text_to_analyze[:3000], height=150)
+    st.expander("📜 Text som kommer att analyseras (förhandsvisning)", expanded=False).text(text_to_analyze[:3000])
 else:
     st.info("ℹ️ Ange en rapport via länk, filuppladdning eller inklistrad text för att kunna starta en analys.")
 
-# --- Analysalternativ ---
+# --- Analysalternativ med Tabs ---
 st.header("⚙️ Välj Analysmetod")
-col_analyze1, col_analyze2 = st.columns(2)
+tab_full_analysis, tab_rag_analysis = st.tabs(["🔍 Fullständig Rapportanalys", "💬 Ställ en Fråga till Rapporten"])
 
-with col_analyze1:
-    if st.button("🔍 Generera fullständig rapportanalys", use_container_width=True):
+with tab_full_analysis:
+    if st.button("Starta fullständig analys", use_container_width=True, key="btn_full_analysis_tab"):
         if text_to_analyze and len(text_to_analyze.strip()) > 20:
             with st.spinner("📊 GPT analyserar hela rapporten..."):
-                st.markdown("### 🧾 Fullständig AI-analys:")
-                ai_report_content = full_rapportanalys(text_to_analyze) # Antag att denna tar hänsyn till språk etc.
+                ai_report_content = full_rapportanalys(text_to_analyze)
                 st.session_state['ai_report_content'] = ai_report_content
-                st.markdown(ai_report_content) # Visa rapporten
+                # Visa rapporten direkt efter generering
+                st.markdown("### 🧾 Fullständig AI-analys:")
+                st.markdown(st.session_state['ai_report_content'])
         else:
             st.error("Ingen text tillgänglig för fullständig analys, eller texten är för kort.")
 
     if 'ai_report_content' in st.session_state and st.session_state['ai_report_content']:
-        if st.button("📄 Spara fullständig AI-analys som PDF", key="save_full_report_pdf_main", use_container_width=True):
-            pdf_bytes = answer_to_pdf(st.session_state['ai_report_content'])
-            # output_path = save_output_file("ai_full_analys.pdf", pdf_bytes) # Spara på server om det är avsikten
-            # st.success(f"PDF för fullständig analys har sparats till servern: {output_path}")
-            st.download_button(label="Ladda ner fullständig analys som PDF",
-                               data=pdf_bytes,
-                               file_name="ai_full_analys.pdf",
-                               mime="application/pdf",
-                               use_container_width=True)
+        st.download_button(label="Ladda ner fullständig analys som PDF",
+                           data=answer_to_pdf(st.session_state['ai_report_content']), # Skapa PDF on-the-fly
+                           file_name="ai_full_analys.pdf",
+                           mime="application/pdf",
+                           use_container_width=True,
+                           key="dl_full_report_pdf_tab")
+        # Om du vill ha "Spara på server" också:
+        # if st.button("📄 Spara fullständig AI-analys som PDF på servern", key="save_full_report_pdf_tab_server", use_container_width=True):
+        #     pdf_bytes = answer_to_pdf(st.session_state['ai_report_content'])
+        #     output_path = save_output_file("ai_full_analys_server.pdf", pdf_bytes)
+        #     st.success(f"PDF för fullständig analys har sparats till servern: {output_path}")
 
 
-with col_analyze2:
-    if "user_question_rag" not in st.session_state: # Nyckel för RAG-fråga
+with tab_rag_analysis:
+    if "user_question_rag" not in st.session_state:
         st.session_state.user_question_rag = "Vilken utdelning per aktie föreslås för nästa år?"
     st.text_input("Din specifika fråga om rapporten:", key="user_question_rag")
 
-    if st.button("💬 Analysera med GPT baserat på fråga", key="analyze_with_rag", use_container_width=True):
+    if st.button("Starta frågebaserad analys", key="btn_rag_analysis_tab", use_container_width=True):
         if text_to_analyze and len(text_to_analyze.strip()) > 20:
             with st.spinner("🤖 GPT söker och analyserar baserat på din fråga..."):
-                # Embedding och chunk-logik
-                source_id = (html_link or (uploaded_file.name if uploaded_file else text_to_analyze[:50])) + "_embeddings_v3"
+                source_id = (html_link or (uploaded_file.name if uploaded_file else text_to_analyze[:50])) + "_embeddings_v4"
                 cache_file = get_embedding_cache_name(source_id)
                 embedded_chunks = load_embeddings_if_exists(cache_file)
 
@@ -270,7 +290,7 @@ with col_analyze2:
                     embedded_chunks = []
                     if chunks:
                         progress_bar = st.progress(0, text="Bearbetar textblock...")
-                        for i, chunk_content in enumerate(chunks, 1): # Byt namn på variabel
+                        for i, chunk_content in enumerate(chunks, 1):
                             try:
                                 embedding = get_embedding(chunk_content)
                                 embedded_chunks.append({"text": chunk_content, "embedding": embedding})
@@ -285,7 +305,7 @@ with col_analyze2:
                         st.warning("Kunde inte skapa några textblock (chunks) från den angivna texten.")
                         st.stop()
                 
-                if not embedded_chunks:
+                if not embedded_chunks: # Dubbelkolla igen efter potentiell skapande
                     st.error("Inga embeddings tillgängliga för analys.")
                     st.stop()
 
@@ -297,7 +317,6 @@ with col_analyze2:
 
                 extra_prompt_for_rag = ""
                 if stock_metrics_data and "error" not in stock_metrics_data:
-                    # Bygg prompten med tillgängliga värden, hantera None
                     beta_val = stock_metrics_data.get('Beta')
                     pe_val = stock_metrics_data.get('PE')
                     yield_val = stock_metrics_data.get('DirectYield')
@@ -310,66 +329,55 @@ with col_analyze2:
                     )
                 
                 final_question_for_rag = extra_prompt_for_rag + st.session_state.user_question_rag
-                if extra_prompt_for_rag: # Visa bara om marknadsdata lades till
+                if extra_prompt_for_rag:
                      st.expander("Slutgiltig fråga som skickas till GPT (inkl. marknadsdata)").caption(final_question_for_rag)
-
 
                 rag_answer_content = generate_gpt_answer(final_question_for_rag, retrieved_context)
                 st.session_state['rag_answer_content'] = rag_answer_content
                 
-                st.success("✅ Svar på fråga klart!")
                 st.markdown(f"### 🤖 GPT-svar:\n{rag_answer_content}")
 
                 if rag_answer_content:
                     st.markdown("--- \n ### Automatisk AI-evaluering (RAGAS):")
-                    # Använd ursprunglig fråga för relevansbedömning, inte den med marknadsdata
                     ragas_result = ragas_evaluate(
                         st.session_state.user_question_rag, 
                         rag_answer_content,
                         [chunk_text_content for _, chunk_text_content in top_chunks_details]
                     )
-                    if ragas_result and "error" in ragas_result: # Kontrollera att ragas_result inte är None
+                    if ragas_result and "error" in ragas_result:
                         st.info(f"(RAGAS) Kunde inte utvärdera svaret: {ragas_result['error']}")
-                    elif ragas_result: # Kontrollera att ragas_result inte är None
+                    elif ragas_result:
                         faith_score = ragas_result.get('faithfulness')
                         ans_rel_score = ragas_result.get('answer_relevancy')
                         col_ragas1, col_ragas2 = st.columns(2)
                         with col_ragas1:
                             st.metric("Faithfulness", f"{faith_score:.2f}" if faith_score is not None else "N/A",
-                                      help="Mäter hur väl AI:ns svar grundar sig på den information som hämtats från rapporten. Högre är bättre.")
+                                      help="Mäter hur väl AI:ns svar grundar sig på den information som hämtats från rapporten (0-1). Högre är bättre.")
                         with col_ragas2:
                             st.metric("Answer Relevancy", f"{ans_rel_score:.2f}" if ans_rel_score is not None else "N/A",
-                                      help="Mäter hur relevant AI:ns svar är på den ställda frågan. Högre är bättre.")
+                                      help="Mäter hur relevant AI:ns svar är på den ställda frågan (0-1). Högre är bättre.")
         else:
             st.error("Ingen text tillgänglig för frågebaserad analys, eller så är texten för kort.")
 
     if 'rag_answer_content' in st.session_state and st.session_state['rag_answer_content']:
-        st.markdown("---") # Avdelare
-        # Flyttat exportknappar till att vara direkt under RAG-svaret, men utanför with col_analyze2
-        # för bättre layout om de tar plats. Eller behåll dem i kolumnen om det ser bättre ut.
-        
-# Knappar för att ladda ner och spara frågebaserat svar (visas om det finns i session state)
-if 'rag_answer_content' in st.session_state and st.session_state['rag_answer_content']:
-    st.subheader("⬇️ Exportera GPT-frågesvar")
-    col_export1, col_export2 = st.columns(2) # Kanske bara två exportknappar här
-    with col_export1:
-        st.download_button(
-            "💾 Ladda ner svar (.txt)",
-            st.session_state['rag_answer_content'],
-            file_name="gpt_frågesvar.txt",
-            key="dl_gpt_txt_rag_main",
-            use_container_width=True
-        )
-    with col_export2:
-        st.download_button(
-            "📄 Ladda ner svar (.pdf)",
-            answer_to_pdf(st.session_state['rag_answer_content']),
-            file_name="gpt_frågesvar.pdf",
-            key="dl_gpt_pdf_rag_main",
-            use_container_width=True
-        )
-    # Spara till server-knapp kan vara här eller tas bort om den inte används ofta
-    # if st.button("📤 Spara GPT-frågesvar som PDF på servern", key="save_rag_answer_pdf_server_main", use_container_width=True):
-    #     pdf_bytes = answer_to_pdf(st.session_state['rag_answer_content'])
-    #     output_path = save_output_file("gpt_frågesvar_server.pdf", pdf_bytes)
-    #     st.success(f"PDF för frågesvar har sparats till servern: {output_path}")
+        st.markdown("---")
+        st.subheader("⬇️ Exportera GPT-frågesvar")
+        col_export_rag1, col_export_rag2 = st.columns(2)
+        with col_export_rag1:
+            st.download_button(
+                "💾 Ladda ner svar (.txt)",
+                st.session_state['rag_answer_content'],
+                file_name="gpt_frågesvar.txt",
+                key="dl_gpt_txt_rag_tab",
+                use_container_width=True
+            )
+        with col_export_rag2:
+            st.download_button(
+                "📄 Ladda ner svar (.pdf)",
+                answer_to_pdf(st.session_state['rag_answer_content']),
+                file_name="gpt_frågesvar.pdf",
+                key="dl_gpt_pdf_rag_tab",
+                use_container_width=True
+            )
+        # if st.button("📤 Spara GPT-frågesvar som PDF på servern", key="save_rag_answer_pdf_server_tab", use_container_width=True):
+        #     # ... (server save logic) ...
