@@ -4,13 +4,12 @@ torch==2.7.0
 torchvision==0.22.0
 torchaudio==2.7.0
 opencv-python-headless==4.9.0.80
-yahooquery
+
 # UI och gränssnitt
 streamlit==1.44.0
 python-dotenv==1.0.1
 streamlit-lottie==0.0.5
-alpha_vantage
-finnhub_python
+
 python_dotenv
 
 # Dataanalys
