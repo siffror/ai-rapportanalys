@@ -34,3 +34,8 @@ yfinance==0.2.33
 ragas
 python-dotenv
 requests
+
+datasets
+evaluate
+transformers
+pandas
