@@ -31,7 +31,7 @@ fpdf==1.7.2
 
 # Finansiella data
 yfinance==0.2.33
-ragas==0.1.9
+ragas
 python-dotenv
 requests
 
