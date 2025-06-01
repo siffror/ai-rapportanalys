@@ -44,17 +44,33 @@
 
 
 ai-rapportanalys/
-├── app.py # Streamlit-huvudfil
-├── core/ # GPT-logik, chunking, embeddings
-├── data/ # Cache, exporter, uppladdningar
-│ ├── embeddings/
-│ ├── outputs/
-│ └── uploads/
-├── services/ # API-klienter, HTML-nedladdning
-├── utils/ # Hjälpmoduler: OCR, PDF-export, filutils m.m.
-├── requirements.txt # Lista över alla Python-paket
-├── README.md # (Du är här!)
-└── .gitignore # Exkluderar känsliga/tempfiler från Git
+├── app.py                 # Streamlit-huvudfil (appens gränssnitt)
+├── gpt_server.py          # (ev. separat serverdel för GPT-logik)
+├── core/                  # GPT-logik, chunking, embedding, filhantering
+│   ├── __init__.py
+│   ├── chunking.py
+│   ├── embedding_utils.py
+│   ├── file_processing.py
+│   └── gpt_logic.py
+├── data/                  # Data och resultat
+│   ├── outputs/
+│   └── uploads/
+├── services/              # API-klienter, HTML-nedladdning
+│   ├── html_downloader.py
+│   └── openai_service.py
+├── utils/                 # Hjälpmoduler: OCR, PDF, cache, mm
+│   ├── __init__.py
+│   ├── cache_utils.py
+│   ├── evaluation_utils.py
+│   ├── file_utils.py
+│   ├── general.py
+│   ├── ocr_utils.py
+│   └── pdf_utils.py
+├── requirements.txt       # Lista över Python-paket
+├── README.md              # Dokumentation
+├── .gitignore             # Exkluderar tempfiler från Git
+└── 1GRWuk0IXN.json        # (logo)
+
 
 ```
 ---
